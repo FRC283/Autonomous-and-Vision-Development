@@ -47,6 +47,7 @@ public class PhantomJoystick
 		bw = new BufferedWriter(fw);			
 		fr = new FileReader(recordData);		//Reader to read data
 		br = new BufferedReader(fr);
+		timeStamper = new Timer();
 	}
 	
 	/**
