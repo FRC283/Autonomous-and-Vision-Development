@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 
+/**
+ * TODO: If pass-by-reference has issues, then let's pass the joystick port and construct another joystick on that port (if WPI allows this)
+ * @author 
+ */
 public class PhantomJoystick
 {
 	public static final int SAMPLING_INTERVAL = 3;
@@ -20,7 +24,7 @@ public class PhantomJoystick
 	public ArrayList<Boolean>[] digital = new ArrayList[5];
 	
 	Timer timeStamper;
-	Joystick realJoystick;
+	Joystick realJoystick;                 //The physical joystick being monitored
 	DriveSubsystem driveTrain;
 	File recordData;
 	FileWriter fw;
@@ -74,25 +78,26 @@ public class PhantomJoystick
 		if (this.isRecording == true) 											//If button is pushed and released
 		{
 			int intervalNum = 0;												//Number of intervals passed
+			//Below: 1000
 			if((1000 / SAMPLING_INTERVAL) * intervalNum <= timeStamper.get())   //If the end of an interval
 			{
-				for (int i = 0; i < digital.length; i++)					//For each possible digital input
+				for (int i = 0; i < digital.length; i++)					    //For each possible digital input
 				{
-					digital[i].add(realJoystick.getRawButton(i));			//Add values to ArrayList to execute for the current interval
+					digital[i].add(realJoystick.getRawButton(i));			    //Add values to ArrayList to execute for the current interval
 				}
-				for (int i = 0; i < analog.length; i++)						//For each possible analog input
+				for (int i = 0; i < analog.length; i++)						    //For each possible analog input
 				{
-					analog[i].add(realJoystick.getRawAxis(i));				//Add values to ArrayList to execute for the current interval
+					analog[i].add(realJoystick.getRawAxis(i));				    //Add values to ArrayList to execute for the current interval
 				}
-				intervalNum++;												//Interval increment
-				return true;
+				intervalNum++;												    //Interval increment
+				return true;                                                    //
 			}
-			if (timeStamper.get() >= MAX_TIME)								//If we reach the recording period's limit
+			if (timeStamper.get() >= MAX_TIME)								    //If we reach the recording period's limit
 			{
-				this.isRecording = false;									//Stop recording
-				bw.write(digital.toString() + "/n");						//Save digital data first line
-				bw.write(analog.toString() +"/n");							//Save analog data second line
-				return false;
+				this.isRecording = false;									    //Stop recording
+				bw.write(digital.toString() + "/n");						    //Save digital data first line
+				bw.write(analog.toString() +"/n");							    //Save analog data second line
+				return false;                                                   //                                              
 			}
 			return true;
 		}
