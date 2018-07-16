@@ -31,7 +31,7 @@ public class PhantomJoystick
 	BufferedWriter bw;
 	FileReader fr;
 	BufferedReader br;
-	
+	Gson gson = new Gson();
 	
 	boolean isRecording = false;
 	boolean startButtonBuffer = false;
@@ -52,6 +52,15 @@ public class PhantomJoystick
 		fr = new FileReader(recordData);		//Reader to read data
 		br = new BufferedReader(fr);
 		timeStamper = new Timer();
+		for (ArrayList<Double> j : analog)      //Initialize analog array
+		{
+			j = new ArrayList<Double>(0);
+		}
+		for (ArrayList<Boolean> h : digital)    //Initialize analog array
+		{
+			h = new ArrayList<Boolean>(0);
+		}
+		gson = new Gson();
 	}
 	
 	/**
