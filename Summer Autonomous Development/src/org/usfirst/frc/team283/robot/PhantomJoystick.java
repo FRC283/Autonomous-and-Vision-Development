@@ -8,6 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.google.gson.Gson;
+
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -82,7 +84,7 @@ public class PhantomJoystick
 	 * Must be repeatedly called in order to record values
 	 * @throws IOException
 	 */
-	public boolean recordPeriodic() throws IOException
+	public boolean recordPeriodic()
 	{
 		if (this.isRecording == true) 											//If button is pushed and released
 		{
@@ -104,13 +106,21 @@ public class PhantomJoystick
 			if (timeStamper.get() >= MAX_TIME)								    //If we reach the recording period's limit
 			{
 				this.isRecording = false;									    //Stop recording
-				bw.write(digital.toString() + "/n");						    //Save digital data first line
-				bw.write(analog.toString() +"/n");							    //Save analog data second line
 				return false;                                                   //                                              
 			}
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Writes the Joystick timelines to robot memory
+	 * @throws IOException 
+	 */
+	public void write() throws IOException
+	{
+		bw.write(gson.toJson(analog) +"/n");							//Save analog data second line
+		bw.write(gson.toJson(digital) + "/n");						    //Save digital data first line
 	}
 	
 	/*
@@ -128,7 +138,8 @@ public class PhantomJoystick
 		//Insert example file here:
 		//
 		String line = br.readLine();													//Gather first line
-		ArrayList<Double>[] data = new ArrayList[analog.length];							//Array to return
+		ArrayList<Double>[] data = new ArrayList[analog.length];						//Array to return
+		/*
 		int index = 0;																	//Holds current index of the array of ArrayLists that values should be stored to
 		for (int i = 0; i > line.length(); i++)											//All characters in the line
 		{
@@ -150,6 +161,8 @@ public class PhantomJoystick
 				data[index].add(Double.parseDouble(currentNum));						//Add parsed String double to the correct index
 			i = i + j;																//Start at the end of the parsed double
 		}
+		*/
+		data = gson.fromJson(line, ArrayList);
 		analog = data;																//return data; SET your internal array																//Return the ArrayList
 	}
 	
@@ -180,11 +193,11 @@ public class PhantomJoystick
 	
 	}
 	
-	public void getVirtualDigitalInput(int interval, int buttonIndex)					//Retrieve correct Array value
+	public void getVirtualButton(int interval, int buttonIndex)					//Retrieve correct Array value
 	{
 		digital[buttonIndex].get(interval);
 	}
-	public void getVirtualAnalogInput(int interval, int axisIndex)						//Retrieve correct Array value
+	public void getVirtualAxis(int interval, int axisIndex)						//Retrieve correct Array value
 	{
 		analog[axisIndex].get(interval);
 	}
