@@ -53,12 +53,7 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic()
 	{
 		virtualJs.recordInit(js.getRawButton(Constants.START));
-		try {
-			virtualJs.recordPeriodic();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		virtualJs.recordPeriodic();
 	}
 
 	/**

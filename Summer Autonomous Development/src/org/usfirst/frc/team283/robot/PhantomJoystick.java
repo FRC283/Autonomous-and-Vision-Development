@@ -162,7 +162,6 @@ public class PhantomJoystick
 			i = i + j;																//Start at the end of the parsed double
 		}
 		*/
-		data = gson.fromJson(line, ArrayList);
 		analog = data;																//return data; SET your internal array																//Return the ArrayList
 	}
 	
