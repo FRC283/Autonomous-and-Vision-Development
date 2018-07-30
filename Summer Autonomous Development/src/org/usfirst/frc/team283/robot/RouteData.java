@@ -30,8 +30,10 @@ public class RouteData
 	public long lastModified;
 	
 	//An array containing an ArrayList of doubles
+	//Length 10
 	protected ArrayList<Double>[] analog;   
 	
 	//An array containing an ArrayList of booleans
+	//Length 5
 	protected ArrayList<Boolean>[] digital;  
 }

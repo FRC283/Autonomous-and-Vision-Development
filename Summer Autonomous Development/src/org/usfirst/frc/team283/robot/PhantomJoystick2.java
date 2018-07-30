@@ -3,6 +3,9 @@ package org.usfirst.frc.team283.robot;
 import java.io.File;
 import java.util.HashMap;
 
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
+
 /**
  * Second version, using the PhantomRoute wrapper class, as well as gson data encoding
  * 
@@ -43,9 +46,15 @@ public class PhantomJoystick2
 	//True when recording the data
 	public boolean recording = false;
 	
+	//Used to mete out recording and playback
+	private Timer timer;
+	
 	//The string name of the route currently being written/read to/from
 	//Why is this a string and not a PhantomRoute? Because java passes objects strangely, so we dont want to make a bunch of dupes
 	private String activeRoute;
+	
+	//Joystick where values are watched during recording
+	private Joystick recordingJoystick;
 	
 	//Contains all PhantomRoutes found all the system
 	private HashMap<String, PhantomRoute> storedRoutes;
@@ -53,6 +62,8 @@ public class PhantomJoystick2
 	public PhantomJoystick2()
 	{
 		storedRoutes = new HashMap<String, PhantomRoute>();
+		
+		timer = new Timer();
 		
 		//Create a directory representation, and start iterating through it for .route files
 		createPhantomRoutes(new File(PhantomJoystick2.rootSearchFolder).listFiles());
@@ -91,6 +102,35 @@ public class PhantomJoystick2
 	}
 	
 	/**
+	 * Whenever the timer is rolling for playback or recording, this function helps translate that
+	 * time value into a useful integer for accessing the arrays that describe the routes
+	 * 
+	 * First, converts the timer value into milliseconds
+	 * Then divides that 1000 milliseconds into a number of steps based on the time spacing
+	 * E.g. if the time spacing is 100, then 1 second will be divided into 10 saved values
+	 * The typecast to int acts as truncation e.g. 127 milliseconds would become 1.17 which is cast to 1.00
+	 *		
+	 * @param timeValue - the number of seconds on the timer.
+	 * @return - the time index for the current timer value
+	 */
+	private int getTimeIndex(double timeValue)
+	{
+		return (int)(timeValue * 1000 / storedRoutes.get(activeRoute).getTimeSpacing());
+	}
+	
+	/**
+	 * Save each PhantomRoute
+	 */
+	private void saveRoutes()
+	{
+		//Iterates through each PhantomRoute and saves it
+		for (PhantomRoute pr : storedRoutes.values())
+		{
+			pr.save();
+		}
+	}
+	
+	/**
 	 * Cannot be used during playback or recording
 	 * @param routeName - name of the route to set to being active
 	 */
@@ -108,39 +148,119 @@ public class PhantomJoystick2
 	}
 	
 	/**
-	 * @return
+	 * @param number - the axis number to get the value for
+	 * @return - the most appropriate value for the current time since playback started
 	 */
-	public double getRawAxis()
+	public double getRawAxis(int number)
 	{
-		return 0;
+		if (playback == true)
+		{
+			return storedRoutes.get(activeRoute).getAnalog(number).get(getTimeIndex(timer.get()));
+		}
+		else
+		{
+			System.err.print("PhantomJoystick.getRawAxis: You must call playbackInit to initiate playback");
+			return 0;
+		}
 	}
 	
-	public void recordInit()
+	/**
+	 * @param number - the button number to get the value for
+	 * @return - the most appropriate value for the current time since playback started
+	 */
+	public boolean getRawButton(int number)
 	{
-		
+		if (playback == true)
+		{
+			return storedRoutes.get(activeRoute).getDigital(number).get(getTimeIndex(timer.get()));
+		}
+		else
+		{
+			System.err.print("PhantomJoystick.getRawAxis: You must call playbackInit to initiate playback");
+			return false;
+		}
 	}
 	
+	/**
+	 * Initiates recording. Values from the passed joystick will be watched
+	 * @param joystick
+	 */
+	public void recordInit(Joystick joystick)
+	{
+		if (playback == false)
+		{
+			timer.reset();
+			timer.start();
+			recordingJoystick = joystick;
+			recording = true;
+		}
+	}
+	
+	/**
+	 * Records joystick values at proper times. Must be called rapidly and periodically to function
+	 */
 	public void recordPeriodic()
 	{
-		
+		if (recording == true)
+		{
+			//First, converts the timer value into milliseconds
+			//Then divides that 1000 milliseconds into a number of steps based on the time spacing
+			//E.g. if the time spacing is 100, then 1 second will be divided into 10 saved values
+			//The typecast to int acts as truncation e.g. 127 milliseconds would become 1.17 which is cast to 1.00
+			int timeIndex = (int)(timer.get() * 1000 / storedRoutes.get(activeRoute).getTimeSpacing());
+			
+			//For each possible analog input
+			for (int a = 0; a < 10; a++)
+			{
+				//Get analog input #a, set its value at the timeIndex to be the current joystick axis value for axis #a
+				storedRoutes.get(activeRoute).getAnalog(a).set(timeIndex, recordingJoystick.getRawAxis(a));
+			}
+			
+			//For each possible digital input
+			for (int d = 0; d < 5; d++)
+			{
+				//Get digital input #d, set its value at the timeIndex to be the current joystick button value for digital #d
+				storedRoutes.get(activeRoute).getDigital(d).set(timeIndex, recordingJoystick.getRawButton(d));
+			}
+		}
+	}
+	
+	/**
+	 * Stops recording
+	 * Saves all PhantomRoutes
+	 */
+	public void recordTerminate()
+	{
+		if (recording == true)
+		{
+			recording = false;
+			timer.stop();
+			timer.reset();
+			saveRoutes();
+		}
 	}
 	
 	public void playbackInit()
 	{
-		
-	}
-	
-	public void playbackPeriodic()
-	{
-		
+		if (recording == false)
+		{
+			timer.reset();
+			timer.start();
+			playback = true;
+		}
 	}
 	
 	/**
-	 * @return
+	 * Stop playback
 	 */
-	public boolean getRawButton()
+	public void playbackTerminate()
 	{
-		return false;
+		if (playback == true)
+		{
+			playback = false;
+			timer.stop();
+			timer.reset();
+		}
 	}
 	
 	/**
