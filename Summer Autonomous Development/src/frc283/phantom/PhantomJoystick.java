@@ -1,4 +1,4 @@
-package org.usfirst.frc.team283.robot;
+package frc283.phantom;
 
 import java.io.File;
 import java.util.HashMap;
@@ -31,7 +31,7 @@ import edu.wpi.first.wpilibj.Timer;
  * 	   controlDrive(pj.getRawAxis(Constants.LeftX))
  * 
  */
-public class PhantomJoystick2 
+public class PhantomJoystick 
 {
 	//The folder where all NEW routes are saved. It's possible that some old routes fell outside this folder. Should not end with a slash
 	public final static String routeFolder = "C:\\Users\\Benjamin\\Desktop\\routes";
@@ -59,14 +59,14 @@ public class PhantomJoystick2
 	//Contains all PhantomRoutes found all the system
 	private HashMap<String, PhantomRoute> storedRoutes;
 	
-	public PhantomJoystick2()
+	public PhantomJoystick()
 	{
 		storedRoutes = new HashMap<String, PhantomRoute>();
 		
 		timer = new Timer();
 		
 		//Create a directory representation, and start iterating through it for .route files
-		createPhantomRoutes(new File(PhantomJoystick2.rootSearchFolder).listFiles());
+		createPhantomRoutes(new File(PhantomJoystick.rootSearchFolder).listFiles());
 	}
 	
 	/**
