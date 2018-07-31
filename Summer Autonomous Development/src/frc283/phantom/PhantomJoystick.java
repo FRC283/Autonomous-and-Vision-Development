@@ -3,6 +3,7 @@ package frc283.phantom;
 import java.io.File;
 import java.util.HashMap;
 
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -58,6 +59,9 @@ public class PhantomJoystick
 	
 	//Contains all PhantomRoutes found all the system
 	private HashMap<String, PhantomRoute> storedRoutes;
+	
+	/** Used to receive commands from the laptop-side */
+	private NetworkTable nTable;
 	
 	public PhantomJoystick()
 	{
@@ -240,6 +244,9 @@ public class PhantomJoystick
 		}
 	}
 	
+	/**
+	 * Initiate playback, to allow using getAxis and getButton
+	 */
 	public void playbackInit()
 	{
 		if (recording == false)
@@ -261,6 +268,21 @@ public class PhantomJoystick
 			timer.stop();
 			timer.reset();
 		}
+	}
+	
+	public void remoteInit()
+	{
+		
+	}
+	
+	public void remotePeriodic()
+	{
+		
+	}
+	
+	public void remoteTerminate()
+	{
+		
 	}
 	
 	/**
