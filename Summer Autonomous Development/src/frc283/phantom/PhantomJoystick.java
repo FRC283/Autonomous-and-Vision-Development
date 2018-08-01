@@ -30,13 +30,27 @@ import edu.wpi.first.wpilibj.Timer;
  *
  * Usage:
  * Initialization:
- *     PhantomJoystick pj = new PhantomJoystick();
- * 	   pj.printStoredRoutes(); //See a stored routes
+ *     PhantomJoystick pj = new PhantomJoystick(new Joystick(0));
+ * 	   pj.printAllOverviews(); //See stored routes
  *     pj.setRoute("napalm_upper_left_shot");
+ *     pj.playbackInit()
  *     
  * Periodic:
- *     pj.startRoute()   
  * 	   controlDrive(pj.getRawAxis(Constants.LeftX))
+ * 
+ * For recording:
+ * Initialization:
+ *     PhantomJoystick pj = new PhantomJoystick(new Joystick(0))
+ * 
+ * Periodic
+ *     pj.recordPeriodic();
+ *     
+ * Remote-Side
+ *     "overview all"
+ *     "setRoute napalm_upper_left_shot"
+ *     "startRecord"
+ *     ...
+ *     "stopRecord"
  * 
  */
 public class PhantomJoystick implements TableEntryListener
@@ -353,21 +367,6 @@ public class PhantomJoystick implements TableEntryListener
 			timer.stop();
 			timer.reset();
 		}
-	}
-	
-	public void remoteInit()
-	{
-		
-	}
-	
-	public void remotePeriodic()
-	{
-		
-	}
-	
-	public void remoteTerminate()
-	{
-		
 	}
 	
 	/**
