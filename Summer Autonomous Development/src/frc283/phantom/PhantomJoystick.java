@@ -2,8 +2,15 @@ package frc283.phantom;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
+import edu.wpi.first.networktables.EntryListenerFlags;
+import edu.wpi.first.networktables.EntryNotification;
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableValue;
+import edu.wpi.first.networktables.TableEntryListener;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -32,8 +39,14 @@ import edu.wpi.first.wpilibj.Timer;
  * 	   controlDrive(pj.getRawAxis(Constants.LeftX))
  * 
  */
-public class PhantomJoystick 
+public class PhantomJoystick implements TableEntryListener
 {
+	public static void main (String... args)
+	{
+		Joystick j = new Joystick(0);
+		PhantomJoystick pj = new PhantomJoystick(j);
+	}
+	
 	//The folder where all NEW routes are saved. It's possible that some old routes fell outside this folder. Should not end with a slash
 	public final static String routeFolder = "C:\\Users\\Benjamin\\Desktop\\routes";
 	
@@ -63,11 +76,20 @@ public class PhantomJoystick
 	/** Used to receive commands from the laptop-side */
 	private NetworkTable nTable;
 	
-	public PhantomJoystick()
+	public PhantomJoystick(Joystick recordingJoystick)
 	{
 		storedRoutes = new HashMap<String, PhantomRoute>();
 		
 		timer = new Timer();
+		
+		this.recordingJoystick = recordingJoystick;
+		
+		NetworkTableInstance nTableInst = NetworkTableInstance.getDefault();
+		nTable = nTableInst.getTable(RemoteConsole.tableName);
+		nTable.getEntry(RemoteConsole.functionKey);
+		
+		//Register self as event listener for function calls over ther remote console
+		nTable.addEntryListener(RemoteConsole.functionKey, this, EntryListenerFlags.kUpdate);
 		
 		//Create a directory representation, and start iterating through it for .route files
 		createPhantomRoutes(new File(PhantomJoystick.rootSearchFolder).listFiles());
@@ -103,6 +125,71 @@ public class PhantomJoystick
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Event Listener for incoming commands on the table
+	 */
+	@Override
+	public void valueChanged(NetworkTable table, String key, NetworkTableEntry entry, NetworkTableValue value, int flags) 
+	{
+		//Entry for the function code
+		NetworkTableEntry functionEntry = entry;
+		
+		//Entry for the function arguments
+		NetworkTableEntry argsEntry = table.getEntry(RemoteConsole.argsKey);
+		
+		//Get the function code value;
+		String functionStr = value.getString();
+		
+		//Get the args value, default is blank string if not found
+		String argsStr = argsEntry.getString("");
+		
+		//String that will be returned to the RemoteConsole and printed there
+		String returnString = "Specified function had no return value.";
+		
+		//Execute the proper function depending on the function code
+		switch (functionStr)
+		{
+			case RemoteConsole.saveCode:
+				saveRoutes();
+				returnString = "Routes saved to drive.";
+			break;
+			case RemoteConsole.copyCode:
+				copyRoute(argsStr);
+				returnString = "Route " + argsStr + " copied successfully.";
+			break;
+			case RemoteConsole.setRouteCode:
+				setActiveRoute(argsStr);
+				returnString = "Active route is now " + argsStr + ".";
+			break;
+			case RemoteConsole.deleteCode:
+				deleteRoute(argsStr);
+				returnString = "Route " + argsStr + " has been deleted.";
+			break;
+			case RemoteConsole.startRecordCode:
+				recordInit();
+				returnString = "Now recording data for route " + activeRoute + ".";
+			break;
+			case RemoteConsole.stopRecordCode:
+				recordTerminate();
+				returnString = "Recording stopped.";
+			break;
+			case RemoteConsole.overviewCode:
+				if (argsStr == "all")
+				{
+					returnString = getAllOverviews();
+				}
+				else
+				{
+					returnString = getRouteOverview(argsStr);
+				}
+			break;
+		}
+		//Return the returnString
+		//Setting the entry to blank first ensures that the script fires off the response into the console
+		nTable.getEntry(RemoteConsole.returnKey).setString("");
+		nTable.getEntry(RemoteConsole.returnKey).setString(returnString);
 	}
 	
 	/**
@@ -187,15 +274,13 @@ public class PhantomJoystick
 	
 	/**
 	 * Initiates recording. Values from the passed joystick will be watched
-	 * @param joystick
 	 */
-	public void recordInit(Joystick joystick)
+	public void recordInit()
 	{
 		if (playback == false)
 		{
 			timer.reset();
 			timer.start();
-			recordingJoystick = joystick;
 			recording = true;
 		}
 	}
