@@ -177,6 +177,9 @@ public class PhantomJoystick implements TableEntryListener
 				setActiveRoute(argsStr);
 				returnString = "Active route is now " + argsStr + ".";
 			break;
+			case RemoteConsole.getRouteCode:
+				returnString = "Active route is " + getActiveRouteName() + ".";
+			break;
 			case RemoteConsole.deleteCode:
 				deleteRoute(argsStr);
 				returnString = "Route " + argsStr + " has been deleted.";

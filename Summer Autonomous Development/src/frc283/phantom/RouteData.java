@@ -22,6 +22,9 @@ public class RouteData
 	//Appears on end of name if greater than 1
 	public int version;
 	
+	//A small description of the intended role e.g. "operator" or "driver"
+	public String role;
+	
 	//The time, in milliseconds, between ArrayList values
 	//Different versions of this class may use different spacing
 	public int timeSpacing;

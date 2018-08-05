@@ -89,8 +89,9 @@ public class PhantomRoute
 	 * @param desc - detailed overview of the route
 	 * @param folder - folder to create the file in
 	 * @param robot - name of the robot to use with route with
+	 * @param role - e.g. "Operator" or "Driver"
 	 */
-	public PhantomRoute(String title, String robot, String desc, int timeSpacing, String folder)
+	public PhantomRoute(String title, String robot, String desc, String role, int timeSpacing, String folder)
 	{
 		this.routeData = new RouteData();
 		
@@ -104,6 +105,8 @@ public class PhantomRoute
 		this.routeData.description = desc.toLowerCase();
 		
 		this.routeData.robot = robot.toLowerCase().replace(" ", "_");
+		
+		this.routeData.role = role.toLowerCase().replace(" ", "_");
 		
 		this.routeData.version = 1;
 		
@@ -414,6 +417,14 @@ public class PhantomRoute
 	}
 	
 	/**
+	 * @return - the role intended for use e.g. "operator"
+	 */
+	public String getRole()
+	{
+		return routeData.role;
+	}
+	
+	/**
 	 * @return - the title of the route, which appears in the file name. E.g. "left_side_high_goal"
 	 */
 	public String getTitle()
@@ -436,7 +447,7 @@ public class PhantomRoute
 	{
 		//If the version is greater than 1, will add _v2, _v3 onto the end. If it's v1, nothing is added
 		String versionAddendum = (routeData.version > 1 ? ("_v" + routeData.version) : "");
-		return routeData.robot + "_" + routeData.title + versionAddendum;
+		return routeData.robot + "_" + routeData.title + "_" + routeData.role + versionAddendum;
 	}
 	
 	/**
