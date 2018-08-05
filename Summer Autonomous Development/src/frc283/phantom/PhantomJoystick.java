@@ -2,10 +2,8 @@ package frc283.phantom;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.function.Consumer;
 
 import edu.wpi.first.networktables.EntryListenerFlags;
-import edu.wpi.first.networktables.EntryNotification;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;

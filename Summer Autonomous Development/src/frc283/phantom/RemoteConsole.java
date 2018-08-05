@@ -1,6 +1,5 @@
 package frc283.phantom;
 
-import java.util.HashMap;
 import java.util.Scanner;
 
 import edu.wpi.first.networktables.NetworkTable;
