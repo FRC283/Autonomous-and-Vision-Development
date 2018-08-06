@@ -25,31 +25,6 @@ import edu.wpi.first.wpilibj.Timer;
  *     Stored Route: All PhantomRoutes that were found on the file system or just created this session. Includes the active route. "Routes" (plural) usually refers to these
  *     Playback: The process of playing back all the joystick data
  *     Recording: The process of actually recording the joystick data
- *
- * Usage:
- * Initialization:
- *     PhantomJoystick pj = new PhantomJoystick(new Joystick(0));
- * 	   pj.printAllOverviews(); //See stored routes
- *     pj.setRoute("napalm_upper_left_shot");
- *     pj.playbackInit()
- *     
- * Periodic:
- * 	   controlDrive(pj.getRawAxis(Constants.LeftX))
- * 
- * For recording:
- * Initialization:
- *     PhantomJoystick pj = new PhantomJoystick(new Joystick(0))
- * 
- * Periodic
- *     pj.recordPeriodic();
- *     
- * Remote-Side
- *     "overview all"
- *     "setRoute napalm_upper_left_shot"
- *     "startRecord"
- *     ...
- *     "stopRecord"
- * 
  */
 public class PhantomJoystick implements TableEntryListener
 {

@@ -26,10 +26,10 @@ public class RemoteConsole implements TableEntryListener
 	public static final String saveCode = "save";
 	public static final String deleteCode = "delete";
 	public static final String copyCode = "copy";
-	public static final String setRouteCode = "setRoute";
-	public static final String getRouteCode = "getRoute";
-	public static final String startRecordCode = "startRecord";
-	public static final String stopRecordCode = "stopRecord";
+	public static final String setRouteCode = "setroute";
+	public static final String getRouteCode = "getroute";
+	public static final String startRecordCode = "startrecord";
+	public static final String stopRecordCode = "stoprecord";
 	public static final String overviewCode = "overview";
 	public static final String stopCode = "stop";
 	
