@@ -3,12 +3,6 @@ package frc283.phantom;
 import java.io.File;
 import java.util.HashMap;
 
-import edu.wpi.first.networktables.EntryListenerFlags;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.NetworkTableValue;
-import edu.wpi.first.networktables.TableEntryListener;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -26,26 +20,21 @@ import edu.wpi.first.wpilibj.Timer;
  *     Playback: The process of playing back all the joystick data
  *     Recording: The process of actually recording the joystick data
  */
-public class PhantomJoystick implements TableEntryListener
+public class PhantomJoystick
 {
-	public static void main (String... args)
-	{
-		Joystick j = new Joystick(0);
-		PhantomJoystick pj = new PhantomJoystick(j);
-	}
-	
 	//The folder where all NEW routes are saved. It's possible that some old routes fell outside this folder. Should not end with a slash
-	public final static String routeFolder = "C:\\Users\\Benjamin\\Desktop\\routes";
+	//public final static String routeFolder = "C:\\Users\\Benjamin\\Desktop\\routes";
+	public final static String routeFolder = "/home/lvuser/frc/routes";
 	
 	//The folder that is searched for all .route files. Should be as high up in the file system as possible
 	//TODO: Find the best value for this
-	public final static String rootSearchFolder = routeFolder;
+	public final static String rootSearchFolder = "/home";
 	
 	//True when playing back the data
-	public boolean playback = false;
+	private boolean playback = false;
 	
 	//True when recording the data
-	public boolean recording = false;
+	private boolean recording = false;
 	
 	//Used to mete out recording and playback
 	private Timer timer;
@@ -60,9 +49,6 @@ public class PhantomJoystick implements TableEntryListener
 	//Contains all PhantomRoutes found all the system
 	private HashMap<String, PhantomRoute> storedRoutes;
 	
-	/** Used to receive commands from the laptop-side */
-	private NetworkTable nTable;
-	
 	public PhantomJoystick(Joystick recordingJoystick)
 	{
 		storedRoutes = new HashMap<String, PhantomRoute>();
@@ -70,13 +56,6 @@ public class PhantomJoystick implements TableEntryListener
 		timer = new Timer();
 		
 		this.recordingJoystick = recordingJoystick;
-		
-		NetworkTableInstance nTableInst = NetworkTableInstance.getDefault();
-		nTable = nTableInst.getTable(RemoteConsole.tableName);
-		nTable.getEntry(RemoteConsole.functionKey);
-		
-		//Register self as event listener for function calls over ther remote console
-		nTable.addEntryListener(RemoteConsole.functionKey, this, EntryListenerFlags.kUpdate);
 		
 		//Create a directory representation, and start iterating through it for .route files
 		createPhantomRoutes(new File(PhantomJoystick.rootSearchFolder).listFiles());
@@ -115,71 +94,6 @@ public class PhantomJoystick implements TableEntryListener
 	}
 	
 	/**
-	 * Event Listener for incoming commands on the table
-	 */
-	@Override
-	public void valueChanged(NetworkTable table, String key, NetworkTableEntry entry, NetworkTableValue value, int flags) 
-	{	
-		//Entry for the function arguments
-		NetworkTableEntry argsEntry = table.getEntry(RemoteConsole.argsKey);
-		
-		//Get the function code value;
-		String functionStr = value.getString();
-		
-		//Get the args value, default is blank string if not found
-		String argsStr = argsEntry.getString("");
-		
-		//String that will be returned to the RemoteConsole and printed there
-		String returnString = "Specified function had no return value.";
-		
-		//Execute the proper function depending on the function code
-		switch (functionStr)
-		{
-			case RemoteConsole.saveCode:
-				saveRoutes();
-				returnString = "Routes saved to drive.";
-			break;
-			case RemoteConsole.copyCode:
-				copyRoute(argsStr);
-				returnString = "Route " + argsStr + " copied successfully.";
-			break;
-			case RemoteConsole.setRouteCode:
-				setActiveRoute(argsStr);
-				returnString = "Active route is now " + argsStr + ".";
-			break;
-			case RemoteConsole.getRouteCode:
-				returnString = "Active route is " + getActiveRouteName() + ".";
-			break;
-			case RemoteConsole.deleteCode:
-				deleteRoute(argsStr);
-				returnString = "Route " + argsStr + " has been deleted.";
-			break;
-			case RemoteConsole.startRecordCode:
-				recordInit();
-				returnString = "Now recording data for route " + activeRoute + ".";
-			break;
-			case RemoteConsole.stopRecordCode:
-				recordTerminate();
-				returnString = "Recording stopped.";
-			break;
-			case RemoteConsole.overviewCode:
-				if (argsStr == "all")
-				{
-					returnString = getAllOverviews();
-				}
-				else
-				{
-					returnString = getRouteOverview(argsStr);
-				}
-			break;
-		}
-		//Return the returnString
-		//Setting the entry to blank first ensures that the script fires off the response into the console
-		nTable.getEntry(RemoteConsole.returnKey).setString("");
-		nTable.getEntry(RemoteConsole.returnKey).setString(returnString);
-	}
-	
-	/**
 	 * Whenever the timer is rolling for playback or recording, this function helps translate that
 	 * time value into a useful integer for accessing the arrays that describe the routes
 	 * 
@@ -215,6 +129,7 @@ public class PhantomJoystick implements TableEntryListener
 	public void setActiveRoute(String routeName)
 	{
 		activeRoute = routeName;
+		System.out.println("Active route is now " + routeName + ".");
 	}
 	
 	/**
@@ -266,6 +181,7 @@ public class PhantomJoystick implements TableEntryListener
 	{
 		if (playback == false)
 		{
+			System.out.println("PhantomJoystick: Recording started.");
 			timer.reset();
 			timer.start();
 			recording = true;
@@ -286,14 +202,14 @@ public class PhantomJoystick implements TableEntryListener
 			int timeIndex = (int)(timer.get() * 1000 / storedRoutes.get(activeRoute).getTimeSpacing());
 			
 			//For each possible analog input
-			for (int a = 0; a < 10; a++)
+			for (int a = 0; a < 6; a++)
 			{
 				//Get analog input #a, set its value at the timeIndex to be the current joystick axis value for axis #a
 				storedRoutes.get(activeRoute).getAnalog(a).set(timeIndex, recordingJoystick.getRawAxis(a));
 			}
 			
 			//For each possible digital input
-			for (int d = 0; d < 5; d++)
+			for (int d = 0; d < 10; d++)
 			{
 				//Get digital input #d, set its value at the timeIndex to be the current joystick button value for digital #d
 				storedRoutes.get(activeRoute).getDigital(d).set(timeIndex, recordingJoystick.getRawButton(d));
@@ -305,10 +221,21 @@ public class PhantomJoystick implements TableEntryListener
 	 * Stops recording
 	 * Saves all PhantomRoutes
 	 */
-	public void recordTerminate()
+	public void recordStop()
 	{
 		if (recording == true)
 		{
+			System.out.println("PhantomJoystick: Recording stopped.");
+			System.out.println("active: " + activeRoute);
+			System.out.println("stored: " + storedRoutes.toString());
+			System.out.println("Analog Array: ");
+			for (int a = 0; a < 6; a++)
+			{
+				PhantomRoute pr = storedRoutes.get(activeRoute);
+				System.out.println("pr: " + pr);
+				System.out.println("index: " + a);
+				System.out.println(pr.getAnalog(a));
+			}
 			recording = false;
 			timer.stop();
 			timer.reset();
@@ -332,7 +259,7 @@ public class PhantomJoystick implements TableEntryListener
 	/**
 	 * Stop playback
 	 */
-	public void playbackTerminate()
+	public void playbackStop()
 	{
 		if (playback == true)
 		{

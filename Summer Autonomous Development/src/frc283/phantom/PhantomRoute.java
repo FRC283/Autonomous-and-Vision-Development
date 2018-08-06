@@ -114,7 +114,7 @@ public class PhantomRoute
 		this.gson = new GsonBuilder().create();
 		
 		//There are 10 analog inputs on the robot
-		this.routeData.analog = new ArrayList[10];
+		this.routeData.analog = new ArrayList[6];
 		
 		//Initialize analog array
 		for (int j = 0; j < this.routeData.analog.length; j++)
@@ -124,7 +124,7 @@ public class PhantomRoute
 		}
 		
 		//There are 10 analog inputs on the robot
-		this.routeData.digital = new ArrayList[5];
+		this.routeData.digital = new ArrayList[10];
 		
 		//Initialize analog array
 		for (int h = 0; h < this.routeData.digital.length; h++)    
@@ -134,10 +134,12 @@ public class PhantomRoute
 		}
 		
 		//E.g. root\routes\2018_napalm_left_side.route
-		String fullPath = this.folder + "\\" + this.getName() + "." + PhantomRoute.extension;
+		String fullPath = this.folder + "/" + this.getName() + "." + PhantomRoute.extension;
 
 		//Access the file or the location where the file will be
 		this.file = new File(fullPath);
+		
+		System.out.println("PhantomRoute: Created a new route file at " + fullPath);
 		
 		//If the file and route is already in existance
 		if (file.exists())
@@ -299,6 +301,7 @@ public class PhantomRoute
 			bufferedWriter.write(gson.toJson(routeData));
 			bufferedWriter.close();
 			fileWriter.close();
+			System.out.println("PhantomRoute: saved " + getName());
 		} 
 		catch (IOException e) 
 		{
@@ -377,7 +380,7 @@ public class PhantomRoute
 		tableStr += "|    Description: \"" + this.getDescription() + "\"\n";
 		tableStr += "|    Saved at " + this.getPath() + "\n";
 		tableStr += "|    Last Modified " + this.getLastModified() + " (24-h Clock) \n";
-		tableStr += "|    Time Spacing: " + this.getTimeSpacing();
+		tableStr += "|    Time Spacing: " + this.getTimeSpacing() + "ms";
 		return tableStr;
 	}
 	
@@ -445,7 +448,7 @@ public class PhantomRoute
 	{
 		//If the version is greater than 1, will add _v2, _v3 onto the end. If it's v1, nothing is added
 		String versionAddendum = (routeData.version > 1 ? ("_v" + routeData.version) : "");
-		return routeData.robot + "_" + routeData.title + "_" + routeData.role + versionAddendum;
+		return routeData.robot + "_" + routeData.role + "_" + routeData.title + versionAddendum;
 	}
 	
 	/**
