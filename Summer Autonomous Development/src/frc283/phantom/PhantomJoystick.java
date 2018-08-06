@@ -146,10 +146,7 @@ public class PhantomJoystick implements TableEntryListener
 	 */
 	@Override
 	public void valueChanged(NetworkTable table, String key, NetworkTableEntry entry, NetworkTableValue value, int flags) 
-	{
-		//Entry for the function code
-		NetworkTableEntry functionEntry = entry;
-		
+	{	
 		//Entry for the function arguments
 		NetworkTableEntry argsEntry = table.getEntry(RemoteConsole.argsKey);
 		
