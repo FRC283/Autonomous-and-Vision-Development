@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj.Timer;
 public class PhantomJoystick
 {
 	//The folder where all NEW routes are saved. It's possible that some old routes fell outside this folder. Should not end with a slash
-	//public final static String routeFolder = "C:\\Users\\Benjamin\\Desktop\\routes";
 	public final static String routeFolder = "/home/lvuser/frc/routes";
 	
 	//The folder that is searched for all .route files. Should be as high up in the file system as possible
@@ -35,6 +34,9 @@ public class PhantomJoystick
 	
 	//True when recording the data
 	private boolean recording = false;
+	
+	//Allows printouts when functions execute. Can disable with disablePrintouts()
+	private boolean allowPrintouts = true;
 	
 	//Used to mete out recording and playback
 	private Timer timer;
@@ -67,30 +69,59 @@ public class PhantomJoystick
 	 */
 	private void createPhantomRoutes(File[] files)
 	{
-		for (File singleFile : files)
+		if (files != null)
 		{
-			if (singleFile.isDirectory())
+			for (File singleFile : files)
 			{
-				//If it's a directory, then make another call to this function to also iterate through THAT directory
-				createPhantomRoutes(singleFile.listFiles());
-			}
-			else
-			{
-				//Position of the "." in the file name
-				int dotIndex = singleFile.getName().lastIndexOf(".") + 1; 
-				
-				//Grab the "route" part of "file.route" (or any other other file extension, like "txt")
-				String extension = singleFile.getName().substring(dotIndex, singleFile.getName().length());
-				if (extension.equalsIgnoreCase("route"))
+				if (singleFile.isDirectory())
 				{
-					//Create a PhantomRoute for this .route file
-					PhantomRoute newPhantomRoute = new PhantomRoute(singleFile.getAbsolutePath());
+					//If it's a directory, then make another call to this function to also iterate through THAT directory
+					createPhantomRoutes(singleFile.listFiles());
+				}
+				else
+				{
+					//Position of the "." in the file name
+					int dotIndex = singleFile.getName().lastIndexOf(".") + 1; 
 					
-					//Push that route onto the storedRoutes
-					storedRoutes.put(newPhantomRoute.getName(), newPhantomRoute);
+					//Grab the "route" part of "file.route" (or any other other file extension, like "txt")
+					String extension = singleFile.getName().substring(dotIndex, singleFile.getName().length());
+					if (extension.equalsIgnoreCase("route"))
+					{
+						//Create a PhantomRoute for this .route file
+						PhantomRoute newPhantomRoute = new PhantomRoute(singleFile.getAbsolutePath());
+						
+						//Push that route onto the storedRoutes
+						storedRoutes.put(newPhantomRoute.getName(), newPhantomRoute);
+					}
 				}
 			}
 		}
+		else
+		{
+			print("No routes found. Create a route or most functions will not work correctly.");
+		}
+	}
+	
+	/**
+	 * Helps control printouts and standardize them
+	 * Not every printout in this class needs to use this
+	 * @param input - will print this with some sort of fixture in front or behind it
+	 */
+	private void print(String input)
+	{
+		if (allowPrintouts == true)
+		{
+			System.out.println("PhantomJoystick: " + input);
+		}
+	}
+	
+	/**
+	 * Stops functions from echoing when called.
+	 * Printouts are enabled by default and cannot be re-enabled after calling this
+	 */
+	public void disablePrintouts()
+	{
+		allowPrintouts = false;
 	}
 	
 	/**
@@ -115,11 +146,22 @@ public class PhantomJoystick
 	 */
 	private void saveRoutes()
 	{
+		print("Saving routes.");
 		//Iterates through each PhantomRoute and saves it
 		for (PhantomRoute pr : storedRoutes.values())
 		{
 			pr.save();
 		}
+	}
+	
+	public void createRoute(String title, String robot, String desc, String role, int timeSpacing)
+	{
+		//Ensures that the route folder exists
+		File folder = new File(routeFolder);
+		//Create a new PhantomRoute file
+		PhantomRoute newPhantomRoute = new PhantomRoute(title, robot, desc, role, timeSpacing, routeFolder);
+		//Add this new route to the index
+		storedRoutes.put(newPhantomRoute.getName(), newPhantomRoute);
 	}
 	
 	/**
@@ -129,7 +171,7 @@ public class PhantomJoystick
 	public void setActiveRoute(String routeName)
 	{
 		activeRoute = routeName;
-		System.out.println("Active route is now " + routeName + ".");
+		print("Active route is now " + routeName + ".");
 	}
 	
 	/**
@@ -181,7 +223,7 @@ public class PhantomJoystick
 	{
 		if (playback == false)
 		{
-			System.out.println("PhantomJoystick: Recording started.");
+			print("Recording started.");
 			timer.reset();
 			timer.start();
 			recording = true;
@@ -225,7 +267,7 @@ public class PhantomJoystick
 	{
 		if (recording == true)
 		{
-			System.out.println("PhantomJoystick: Recording stopped.");
+			print("Recording stopped.");
 			System.out.println("active: " + activeRoute);
 			System.out.println("stored: " + storedRoutes.toString());
 			System.out.println("Analog Array: ");
@@ -250,6 +292,7 @@ public class PhantomJoystick
 	{
 		if (recording == false)
 		{
+			print("Playback initiated.");
 			timer.reset();
 			timer.start();
 			playback = true;
@@ -263,6 +306,7 @@ public class PhantomJoystick
 	{
 		if (playback == true)
 		{
+			print("Playback stopped.");
 			playback = false;
 			timer.stop();
 			timer.reset();
@@ -278,6 +322,7 @@ public class PhantomJoystick
 	{
 		PhantomRoute copy = new PhantomRoute(storedRoutes.get(routeName));
 		storedRoutes.put(copy.getName(), copy);
+		print("Copied route " + routeName + " to route " + copy.getName() + ".");
 	}
 	
 	/**
@@ -288,6 +333,7 @@ public class PhantomJoystick
 	{
 		storedRoutes.get(routeName).delete();
 		storedRoutes.remove(routeName);
+		print("Removed route " + routeName + ".");
 	}
 	
 	/**
@@ -304,6 +350,7 @@ public class PhantomJoystick
 	 */
 	public void printRouteOverview(String routeName)
 	{
+		//No print() function used because it has enough preface already, and also doesnt need to be enabled/disabled
 		System.out.println(getRouteOverview(routeName));
 	}
 	
@@ -331,6 +378,7 @@ public class PhantomJoystick
 	 */
 	public void printAllOverviews()
 	{
+		//No print() function used because it has enough preface already, and also doesnt need to be enabled/disabled
 		System.out.println(getAllOverviews());
 	}
 }

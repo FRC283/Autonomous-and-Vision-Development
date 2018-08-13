@@ -134,7 +134,7 @@ public class PhantomRoute
 		}
 		
 		//E.g. root\routes\2018_napalm_left_side.route
-		String fullPath = this.folder + "/" + this.getName() + "." + PhantomRoute.extension;
+		String fullPath = this.folder + File.pathSeparator + this.getName() + "." + PhantomRoute.extension;
 
 		//Access the file or the location where the file will be
 		this.file = new File(fullPath);
