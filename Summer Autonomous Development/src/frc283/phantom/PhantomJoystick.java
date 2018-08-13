@@ -2,7 +2,6 @@ package frc283.phantom;
 
 import java.io.File;
 import java.util.HashMap;
-
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -27,7 +26,7 @@ public class PhantomJoystick
 	
 	//The folder that is searched for all .route files. Should be as high up in the file system as possible
 	//TODO: Find the best value for this
-	public final static String rootSearchFolder = "/home";
+	public final static String ROOT_SEARCH_FOLDER = "/home";
 	
 	//True when playing back the data
 	private boolean playback = false;
@@ -60,7 +59,7 @@ public class PhantomJoystick
 		this.recordingJoystick = recordingJoystick;
 		
 		//Create a directory representation, and start iterating through it for .route files
-		createPhantomRoutes(new File(PhantomJoystick.rootSearchFolder).listFiles());
+		createPhantomRoutes(new File(PhantomJoystick.ROOT_SEARCH_FOLDER).listFiles());
 	}
 	
 	/**

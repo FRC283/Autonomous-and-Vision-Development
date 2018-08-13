@@ -51,11 +51,11 @@ import com.google.gson.GsonBuilder;
  */
 public class PhantomRoute 
 {	
+	//All newly created route files end with this file type/extension
+	public final static String EXTENSION = "route";
+	
 	//Object that contains all actual data describing route of robot
 	public RouteData routeData;
-	
-	//All newly created route files end with this file type/extension
-	public final static String extension = "route";
 	
 	//The path to the folder that the wrapped file is in
 	protected String folder;
@@ -134,7 +134,7 @@ public class PhantomRoute
 		}
 		
 		//E.g. root\routes\2018_napalm_left_side.route
-		String fullPath = this.folder + File.pathSeparator + this.getName() + "." + PhantomRoute.extension;
+		String fullPath = this.folder + File.pathSeparator + this.getName() + "." + PhantomRoute.EXTENSION;
 
 		//Access the file or the location where the file will be
 		this.file = new File(fullPath);
@@ -456,7 +456,7 @@ public class PhantomRoute
 	 */
 	public String getExtension()
 	{
-		return PhantomRoute.extension;
+		return PhantomRoute.EXTENSION;
 	}
 	
 	/**
