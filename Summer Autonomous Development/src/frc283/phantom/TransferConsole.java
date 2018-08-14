@@ -12,27 +12,34 @@ public class TransferConsole
 {
 	public enum PCode
 	{
-		SAVE("save"),
-		DELETE("delete"),
-		COPY("copy"),
-		SET("set"),
-		GET("get"),
-		CREATE("create"),
-		SEND("send"),
-		RETRIEVE("retrive"),
-		START_RECORD("startrec"),
-		STOP_RECORD("stoprec"),
-		OVERVIEW("overview"),
-		STOP("stop");
+		SAVE("save", "Save all phantom routes to the os, not just the active route."),
+		DELETE("delete", "Deletes the route with the passed name. E.g: delete napalm_left_side."),
+		COPY("copy", "Creates a copy of the passed route. E.g: copy napalm_left_side - this makes napalm_left_side_v2."),
+		SET("set", "Sets the active route. Takes one parameter, the name of the route to be the new active route."),
+		GET("get", "Returns the name of the active route."),
+		CREATE("create", "Creates a new route. The parameters are [title - short description] [robot - intended bot] [desc - in-depth description of route] [role - driver/operator] [spacing - number of ms between measurements]"),
+		START_RECORD("startrec", "Starts recording. Make sure you set a route first."),
+		STOP_RECORD("stoprec", "Stops the recording."),
+		OVERVIEW("overview", "Prints an overview of the given route. Pass 'all' to see an overview of all available routes. E.g: overview guillotine_center OR overview all."),
+		HELP("help", "Describes all the available codes to pass."),
+		STOP("stop", "Stops the console.");
 		
+		/** The code you type in to execute this function */
 		private String codeStr;
-		PCode(String codeStr)
+		/** Short description printed when help is requested */
+		private String desc;
+		PCode(String codeStr, String desc)
 		{
 			this.codeStr = codeStr;
+			this.desc = desc;
 		}
 		public String get()
 		{
 			return this.codeStr;
+		}
+		public String desc()
+		{
+			return this.desc;
 		}
 	}
 	
@@ -102,6 +109,21 @@ public class TransferConsole
 		listeners.get(code).add(listener);
 	}
 	
+	/**
+	 * Prints a summary of function purposes to the system.out
+	 */
+	private void printHelp()
+	{
+		System.out.println("Here's a summary of codes and their purposes.");
+		for (PCode s : PCode.values())
+		{
+			//20 dashes
+			System.out.println("--------------------");
+			System.out.println("| " + s.get() + " - " + s.desc());
+		}
+		System.out.println("--------------------");
+	}
+	
 	private void openStream()
 	{
 		System.out.println("Console Open");
@@ -158,6 +180,11 @@ public class TransferConsole
 			System.out.println("Console Closed.");
 			//Can any further looping
 			return false;
+		}
+		else if(functionWord == PCode.HELP.get())
+		{
+			printHelp();
+			return true;
 		}
 		else
 		{

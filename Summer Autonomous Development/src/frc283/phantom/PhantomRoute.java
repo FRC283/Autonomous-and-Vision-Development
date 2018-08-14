@@ -57,9 +57,6 @@ public class PhantomRoute
 	//Object that contains all actual data describing route of robot
 	public RouteData routeData;
 	
-	//The path to the folder that the wrapped file is in
-	protected String folder;
-	
 	//The file on the RoboRIO that contains this route's data
 	protected File file;
 	
@@ -108,8 +105,6 @@ public class PhantomRoute
 		
 		this.routeData.version = 1;
 		
-		this.folder = folder.toLowerCase();
-		
 		//Using a GsonBuilder allows pretty printing to be set to true, meaning the output file will be more human-friendly to read
 		this.gson = new GsonBuilder().create();
 		
@@ -134,7 +129,7 @@ public class PhantomRoute
 		}
 		
 		//E.g. root\routes\2018_napalm_left_side.route
-		String fullPath = this.folder + File.pathSeparator + this.getName() + "." + PhantomRoute.EXTENSION;
+		String fullPath = folder.toLowerCase() + File.pathSeparator + this.getName() + "." + PhantomRoute.EXTENSION;
 
 		//Access the file or the location where the file will be
 		this.file = new File(fullPath);
@@ -166,8 +161,6 @@ public class PhantomRoute
 	{
 		this.gson = new GsonBuilder().create();
 		
-		this.file = new File(phantomRoute.getPath());
-		
 		this.routeData = new RouteData();
 		
 		this.routeData.lastModified = new Date().getTime();
@@ -181,6 +174,8 @@ public class PhantomRoute
 		this.routeData.robot = phantomRoute.getRobot();
 		
 		this.routeData.version = phantomRoute.getVersion() + 1;
+		
+		this.file = new File(phantomRoute.getFolder() + File.pathSeparator + this.getName() + "." + EXTENSION);
 	}
 	
 	/**
@@ -465,5 +460,13 @@ public class PhantomRoute
 	public String getPath()
 	{
 		return file.getAbsolutePath();
+	}
+	
+	/**
+	 * @return - the absolute file path to folder this resides in
+	 */
+	public String getFolder()
+	{
+		return file.getParentFile().getAbsolutePath();
 	}
 }
