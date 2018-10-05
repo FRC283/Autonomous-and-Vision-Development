@@ -217,11 +217,16 @@ public class PhantomJoystick
 	
 	/**
 	 * Initiates recording. Values from the passed joystick will be watched
+	 * @param override - Clears out the data first if passed
 	 */
-	public void recordInit()
+	public void recordInit(boolean override)
 	{
 		if (playback == false)
 		{
+			if (override)
+			{
+				this.clearRoute();
+			}
 			print("Recording started.");
 			timer.reset();
 			timer.start();
@@ -230,7 +235,18 @@ public class PhantomJoystick
 	}
 	
 	/**
+	 * Initiates recording. Values from the passed joystick will be watched
+	 * WILL OVERRIDE EXSITING DATA
+	 * This is the same as calling recordInit(true). See function definition
+	 */
+	public void recordInit()
+	{
+		this.recordInit(true);
+	}
+	
+	/**
 	 * Records joystick values at proper times. Must be called rapidly and periodically to function
+	 * This function appends data onto the end of the timelines
 	 */
 	public void recordPeriodic()
 	{
@@ -242,25 +258,28 @@ public class PhantomJoystick
 			//The typecast to int acts as truncation e.g. 127 milliseconds would become 1.27 which is cast to 1.00
 			int timeIndex = getTimeIndex(timer.get());
 			
-			//For each possible analog input
-			for (int a = 0; a < 6; a++)
+			if (timeIndex > 1) //If at least one time-step has passed since last recording
 			{
-				//Get analog input #a, set its value at the timeIndex to be the current joystick axis value for axis #a
-				storedRoutes.get(activeRoute).getAnalog(a).set(timeIndex, recordingJoystick.getRawAxis(a));
+				//For each possible analog input
+				for (int a = 0; a < 6; a++)
+				{
+					//Get analog input #a, set its value at the timeIndex to be the current joystick axis value for axis #a
+					storedRoutes.get(activeRoute).getAnalog(a).add(recordingJoystick.getRawAxis(a));
+				}
+				
+				//For each possible digital input
+				for (int d = 0; d < 10; d++)
+				{
+					//Get digital input #d, set its value at the timeIndex to be the current joystick button value for digital #d
+					storedRoutes.get(activeRoute).getDigital(d).add(recordingJoystick.getRawButton(d));
+				}
+				
+				//IMPORTANT: reset the timer.
+				timer.reset();
 			}
-			
-			//For each possible digital input
-			for (int d = 0; d < 10; d++)
+			else //If one time-step hasn't passed
 			{
-				//Get digital input #d, set its value at the timeIndex to be the current joystick button value for digital #d
-				storedRoutes.get(activeRoute).getDigital(d).set(timeIndex, recordingJoystick.getRawButton(d));
-				//			 |||||| 		|||||||||		|||||||||		||||	|||			||||||||||
-				//			|||	 |||		||	  |||		||				|||||	|||			||		 ||
-				//			|||  |||		||    |||		||       		|| |||	|||			||		 ||
-				//			||||||||		|||||||||		|||||||||		||	|||	|||			||		 ||
-				//			||    ||		||				||      		||   ||||||			||		 ||
-				//			||	  ||		||				||				||     ||||			||       ||
-				//			||	  ||		||				|||||||||		||		|||			||||||||||
+				//Do nothing
 			}
 		}
 	}
@@ -340,6 +359,14 @@ public class PhantomJoystick
 		storedRoutes.get(routeName).delete();
 		storedRoutes.remove(routeName);
 		print("Removed route " + routeName + ".");
+	}
+	
+	/**
+	 * Clears all timeline data inside the active route
+	 */
+	public void clearRoute()
+	{
+		storedRoutes.get(activeRoute).clear();
 	}
 	
 	/**

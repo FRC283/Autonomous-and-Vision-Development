@@ -34,9 +34,11 @@ public class RouteData
 	
 	//An array containing ArrayLists of doubles
 	//Length 6
+	//These are the analog "timelines"
 	protected ArrayList<Double>[] analog;   
 	
 	//An array containing ArrayLists of booleans
 	//Length 10
+	//These are the digital "timelines"
 	protected ArrayList<Boolean>[] digital;  
 }
