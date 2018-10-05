@@ -108,7 +108,7 @@ public class PhantomRoute
 		//Using a GsonBuilder allows pretty printing to be set to true, meaning the output file will be more human-friendly to read
 		this.gson = new GsonBuilder().create();
 		
-		//There are 10 analog inputs on the robot
+		//There are 6 analog inputs on the robot
 		this.routeData.analog = new ArrayList[6];
 		
 		//Initialize analog array
@@ -118,7 +118,7 @@ public class PhantomRoute
 			this.routeData.analog[j] = new ArrayList<Double>(0);
 		}
 		
-		//There are 10 analog inputs on the robot
+		//There are 10 digital inputs on the robot
 		this.routeData.digital = new ArrayList[10];
 		
 		//Initialize analog array

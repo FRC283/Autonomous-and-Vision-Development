@@ -130,7 +130,7 @@ public class PhantomJoystick
 	 * First, converts the timer value into milliseconds
 	 * Then divides that 1000 milliseconds into a number of steps based on the time spacing
 	 * E.g. if the time spacing is 100, then 1 second will be divided into 10 saved values
-	 * The typecast to int acts as truncation e.g. 127 milliseconds would become 1.17 which is cast to 1.00
+	 * The typecast to int acts as truncation e.g. 127 milliseconds would become 1.27 which is cast to 1.00
 	 *		
 	 * @param timeValue - the number of seconds on the timer.
 	 * @return - the time index for the current timer value
@@ -239,8 +239,8 @@ public class PhantomJoystick
 			//First, converts the timer value into milliseconds
 			//Then divides that 1000 milliseconds into a number of steps based on the time spacing
 			//E.g. if the time spacing is 100, then 1 second will be divided into 10 saved values
-			//The typecast to int acts as truncation e.g. 127 milliseconds would become 1.17 which is cast to 1.00
-			int timeIndex = (int)(timer.get() * 1000 / storedRoutes.get(activeRoute).getTimeSpacing());
+			//The typecast to int acts as truncation e.g. 127 milliseconds would become 1.27 which is cast to 1.00
+			int timeIndex = getTimeIndex(timer.get());
 			
 			//For each possible analog input
 			for (int a = 0; a < 6; a++)
@@ -254,6 +254,13 @@ public class PhantomJoystick
 			{
 				//Get digital input #d, set its value at the timeIndex to be the current joystick button value for digital #d
 				storedRoutes.get(activeRoute).getDigital(d).set(timeIndex, recordingJoystick.getRawButton(d));
+				//			 |||||| 		|||||||||		|||||||||		||||	|||			||||||||||
+				//			|||	 |||		||	  |||		||				|||||	|||			||		 ||
+				//			|||  |||		||    |||		||       		|| |||	|||			||		 ||
+				//			||||||||		|||||||||		|||||||||		||	|||	|||			||		 ||
+				//			||    ||		||				||      		||   ||||||			||		 ||
+				//			||	  ||		||				||				||     ||||			||       ||
+				//			||	  ||		||				|||||||||		||		|||			||||||||||
 			}
 		}
 	}
