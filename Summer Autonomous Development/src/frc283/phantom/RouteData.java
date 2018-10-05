@@ -32,11 +32,11 @@ public class RouteData
 	//A number that can be used to see when this route's timeline data was last modified
 	public long lastModified;
 	
-	//An array containing an ArrayList of doubles
+	//An array containing ArrayLists of doubles
 	//Length 6
 	protected ArrayList<Double>[] analog;   
 	
-	//An array containing an ArrayList of booleans
+	//An array containing ArrayLists of booleans
 	//Length 10
 	protected ArrayList<Boolean>[] digital;  
 }
